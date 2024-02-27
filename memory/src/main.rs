@@ -31,6 +31,10 @@ fn main() {
     println!("int_a: {:p}", &int_a);
     println!("int_a size: {:?} bytes", std::mem::size_of_val(&int_a));
 
+    let int_b: i16 = 100;
+    println!("int_b: {:p}", &int_b);
+    println!("int_int_ba size: {:?} bytes", std::mem::size_of_val(&int_b));
+
     // array
     // → stack
     let array_a: [i8; 10] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
