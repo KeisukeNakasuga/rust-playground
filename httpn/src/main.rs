@@ -5,7 +5,7 @@ trait ApiRequest {
 }
 
 trait ApiGetMethod {
-    fn get<P: ApiRequest>(&self, req: P) -> Result<String, reqwest::Error>;
+    fn get<Req: ApiRequest>(&self, req: Req) -> Result<String, reqwest::Error>;
 }
 
 struct OpenMeteoWeatherForecastApiRequest {
