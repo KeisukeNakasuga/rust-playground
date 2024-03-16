@@ -1,11 +1,16 @@
 // see https://open-meteo.com/
 
+use std::error::Error;
+use reqwest;
+use serde::{Deserialize};
+use serde_json;
+
 trait ApiRequest {
     fn url(&self) -> String;
 }
 
-trait ApiGetMethod {
-    fn get<Req: ApiRequest>(&self, req: Req) -> Result<String, reqwest::Error>;
+trait HttpGet<Res> {
+    fn get<Req: ApiRequest>(&self, req: Req) -> Result<Res, Box<dyn Error>>;
 }
 
 struct OpenMeteoWeatherForecastApiRequest {
@@ -19,17 +24,29 @@ impl ApiRequest for OpenMeteoWeatherForecastApiRequest {
     }
 }
 
+#[derive(Deserialize)]
+struct OpenMeteoWeatherForecastApiResponse {
+    latitude: f32,
+    longitude: f32,
+    generationtime_ms: f32,
+    utc_offset_seconds: i8,
+    timezone: String,
+    timezone_abbreviation: String,
+    elevation:f32,
+}
+
 struct OpenMeteoWeatherForecastApi;
 
 impl OpenMeteoWeatherForecastApi {
     const BASE_URL: &'static str = "https://api.open-meteo.com/v1/forecast";
 }
 
-impl ApiGetMethod for OpenMeteoWeatherForecastApi {
-    fn get<Req: ApiRequest>(&self, req: Req) -> Result<String, reqwest::Error> {
+impl HttpGet<OpenMeteoWeatherForecastApiResponse> for OpenMeteoWeatherForecastApi {
+    fn get<Req: ApiRequest>(&self, req: Req) -> Result<OpenMeteoWeatherForecastApiResponse, Box<dyn Error>> {
         let url = req.url();
-        let res = reqwest::blocking::get(&url)?.text()?;
-        Ok(res)
+        let body = reqwest::blocking::get(&url)?.text()?;
+        let obj = serde_json::from_str(&body)?;
+        Ok(obj)
     }
 }
 
@@ -40,7 +57,9 @@ fn main() {
     let res = api.get(req);
 
     match res {
-        Ok(res) => println!("Response: {}", res),
+        Ok(res) => println!(
+            "Response: latitude => {}, longitude => {}, generationtime_ms => {}, utc_offset_seconds => {}, timezone => {}, timezone_abbreviation => {}, elevation => {}",
+            res.latitude, res.longitude, res.generationtime_ms, res.utc_offset_seconds, res.timezone, res.timezone_abbreviation, res.elevation),
         Err(e) => println!("Error: {}", e),
     }
 }
