@@ -20,7 +20,7 @@ struct OpenMeteoWeatherForecastApiRequest {
 
 impl ApiRequest for OpenMeteoWeatherForecastApiRequest {
     fn url(&self) -> String {
-        format!("{}?latitude={}&longitude={}", OpenMeteoWeatherForecastApi::BASE_URL, self.latitude, self.longitude)
+        format!("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}", self.latitude, self.longitude)
     }
 }
 
@@ -36,10 +36,6 @@ struct OpenMeteoWeatherForecastApiResponse {
 }
 
 struct OpenMeteoWeatherForecastApi;
-
-impl OpenMeteoWeatherForecastApi {
-    const BASE_URL: &'static str = "https://api.open-meteo.com/v1/forecast";
-}
 
 impl HttpGet<OpenMeteoWeatherForecastApiResponse> for OpenMeteoWeatherForecastApi {
     fn get<Req: ApiRequest>(&self, req: Req) -> Result<OpenMeteoWeatherForecastApiResponse, Box<dyn Error>> {
